@@ -37,6 +37,15 @@ export default function LandingPage() {
       <main className="flex flex-1 items-center">
         <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 px-4 py-8 sm:px-6 md:grid-cols-2 md:py-10">
           <div>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent shadow-sm">
+                <Activity size={24} className="text-on-accent" aria-hidden />
+              </span>
+              <div>
+                <p className="text-3xl font-bold tracking-tight text-ink">FollowCare</p>
+                <p className="text-sm text-muted">Clinic follow-up</p>
+              </div>
+            </div>
             <p className="text-sm font-semibold text-accent">Post-visit care, without constant monitoring</p>
             <h1 className="mt-3 text-[34px] font-semibold leading-tight tracking-tight text-ink md:text-[42px]">
               Know who needs attention before the next visit.
