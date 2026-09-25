@@ -18,12 +18,10 @@ export default function LandingPage() {
     <div className="flex min-h-dvh flex-col overflow-hidden bg-canvas">
       <header className="border-b border-line bg-panel">
         <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" aria-label="FollowCare home" className="flex items-center">
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
               <Activity size={15} className="text-on-accent" aria-hidden />
             </span>
-            <span className="text-[15px] font-bold tracking-tight text-ink">FollowCare</span>
-            <span className="hidden text-xs text-muted lg:block">Clinic follow-up</span>
           </Link>
           <Link
             href="/dashboard"
@@ -37,13 +35,13 @@ export default function LandingPage() {
       <main className="flex flex-1 items-center">
         <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 px-4 py-8 sm:px-6 md:grid-cols-2 md:py-10">
           <div>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent shadow-sm">
-                <Activity size={24} className="text-on-accent" aria-hidden />
+            <div className="mb-6 flex items-center gap-5">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent shadow-sm sm:h-20 sm:w-20">
+                <Activity size={36} className="text-on-accent sm:h-10 sm:w-10" aria-hidden />
               </span>
               <div>
-                <p className="text-3xl font-bold tracking-tight text-ink">FollowCare</p>
-                <p className="text-sm text-muted">Clinic follow-up</p>
+                <p className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">FollowCare</p>
+                <p className="mt-1 text-base text-muted">Clinic follow-up</p>
               </div>
             </div>
             <p className="text-sm font-semibold text-accent">Post-visit care, without constant monitoring</p>
