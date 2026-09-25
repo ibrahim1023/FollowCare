@@ -17,12 +17,7 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-dvh flex-col overflow-hidden bg-canvas">
       <header className="border-b border-line bg-panel">
-        <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-          <Link href="/" aria-label="FollowCare home" className="flex items-center">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
-              <Activity size={15} className="text-on-accent" aria-hidden />
-            </span>
-          </Link>
+        <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-end px-4 sm:px-6">
           <Link
             href="/dashboard"
             className="rounded-md bg-accent px-3.5 py-1.5 text-sm font-semibold text-on-accent hover:bg-accent-deep"
