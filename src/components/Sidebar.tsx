@@ -7,7 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { Role } from "@/lib/types";
 
 const NAV = [
-  { href: "/", label: "Overview" },
+  { href: "/dashboard", label: "Overview" },
   { href: "/patients", label: "Patients" },
   { href: "/nurse-queue", label: "Nurse review" },
   { href: "/doctor-queue", label: "Doctor review" },
@@ -24,7 +24,7 @@ export function Sidebar() {
   const countFor = (href: string) =>
     href === "/nurse-queue" ? nurseCount : href === "/doctor-queue" ? doctorCount : 0;
 
-  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const isActive = (href: string) => (href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href));
 
   const controls = (
     <div className="flex items-center gap-3">
@@ -49,7 +49,7 @@ export function Sidebar() {
     <header className="sticky top-0 z-30 border-b border-line bg-panel shadow-sm">
       <div className="mx-auto max-w-[1320px] px-4 sm:px-6">
         <div className="flex h-14 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
               <Activity size={15} className="text-on-accent" aria-hidden />
             </span>
