@@ -41,7 +41,7 @@ export function ConversationDrawer({ checkin, patient, alert, onClose }: { check
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch justify-end bg-canvas/80"
+      className="fixed inset-0 z-50 flex items-stretch justify-end bg-ink/35"
       role="dialog"
       aria-modal="true"
       aria-label={`Conversation transcript for ${patient.name}`}
@@ -86,7 +86,7 @@ export function ConversationDrawer({ checkin, patient, alert, onClose }: { check
                 className={`max-w-[80%] rounded-lg px-3.5 py-2 text-[13px] leading-relaxed ${
                   m.role === "PATIENT"
                     ? "border border-accent/30 bg-accent-soft/50 text-ink"
-                    : "border border-line bg-panel-raised text-body"
+                    : "border border-line bg-panel text-body"
                 }`}
               >
                 <p className="whitespace-pre-line">{m.content}</p>

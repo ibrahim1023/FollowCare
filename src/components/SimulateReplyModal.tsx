@@ -172,7 +172,7 @@ export function SimulateReplyModal({ patient, onClose }: { patient: Patient; onC
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/80 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/35 p-4"
       role="dialog"
       aria-modal="true"
       aria-label={`Simulated follow-up conversation with ${patient.name}`}
@@ -251,7 +251,7 @@ export function SimulateReplyModal({ patient, onClose }: { patient: Patient; onC
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 rounded-md bg-accent px-4 py-2 text-[13px] font-semibold text-canvas hover:bg-accent-deep"
+                className="flex-1 rounded-md bg-accent px-4 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-deep"
               >
                 Done
               </button>
@@ -266,7 +266,7 @@ export function SimulateReplyModal({ patient, onClose }: { patient: Patient; onC
                     className={`max-w-[75%] rounded-lg px-3.5 py-2 text-[13px] leading-relaxed ${
                       m.role === "PATIENT"
                         ? "border border-accent/30 bg-accent-soft/50 text-ink"
-                        : "border border-line bg-panel-raised text-body"
+                        : "border border-line bg-panel text-body"
                     }`}
                   >
                     <p className="whitespace-pre-line">{m.content}</p>
@@ -351,7 +351,7 @@ export function SimulateReplyModal({ patient, onClose }: { patient: Patient; onC
                 onClick={handleSend}
                 disabled={!draft.trim() || waiting || locked}
                 aria-label="Send patient reply"
-                className="rounded-md bg-accent p-2.5 text-canvas hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-md bg-accent p-2.5 text-on-accent hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Send size={15} aria-hidden />
               </button>
