@@ -108,7 +108,11 @@ export interface Alert {
   closedBy?: string;
   closedAt?: string;
   finalMessageId?: string;
+  doctorAttention?: DoctorAttention;
+  doctorRecommendation?: string;
 }
+
+export type DoctorAttention = "NEEDS_ATTENTION" | "NO_ATTENTION_NEEDED";
 
 export interface TeamMember {
   id: string;

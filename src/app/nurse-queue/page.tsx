@@ -41,7 +41,7 @@ export default function NurseQueuePage() {
   const routine = nurseAlerts.filter((a) => a.severity === "LOW" && a.status !== "resolved");
   const actionRequired = nurseAlerts.filter((a) => a.severity === "MEDIUM" && a.status !== "resolved");
   const closed = nurseAlerts.filter((a) => a.status === "resolved").slice(-5).reverse();
-  const scheduling = state.appointments.filter((a) => a.status === "OPTIONS_SENT");
+  const scheduling = state.appointments.filter((a) => a.status === "SUGGESTED" || a.status === "OPTIONS_SENT");
 
   function patientOf(a: Alert) {
     return state.patients.find((p) => p.id === a.patientId);
@@ -202,6 +202,7 @@ export default function NurseQueuePage() {
           <ul className="space-y-2">
             {scheduling.map((appt) => {
               const patient = state.patients.find((p) => p.id === appt.patientId);
+              const linkedAlert = appt.alertId ? state.alerts.find((a) => a.id === appt.alertId) : undefined;
               return (
                 <li key={appt.id} className="rounded-lg border border-line bg-panel p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -209,11 +210,24 @@ export default function NurseQueuePage() {
                       <p className="text-[13px] font-semibold text-ink">
                         {patient?.name} — {appt.type} with {appt.clinician}
                       </p>
-                      <p className="mono-label mt-0.5 text-[9px] text-muted">Options sent · awaiting patient confirmation</p>
+                      <p className="mono-label mt-0.5 text-[9px] text-muted">
+                        {appt.status === "SUGGESTED"
+                          ? `Doctor recommends appointment · ${appt.reason}`
+                          : "Options sent · awaiting patient confirmation"}
+                      </p>
                     </div>
+                    {appt.status === "SUGGESTED" && linkedAlert && (
+                      <button
+                        onClick={() => openModal("appointment", linkedAlert)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-canvas hover:bg-accent-deep"
+                      >
+                        <CalendarPlus size={13} aria-hidden /> Prepare & send slot options
+                      </button>
+                    )}
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {appt.proposedSlots.map((slot) => (
+                  {appt.status === "OPTIONS_SENT" && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {appt.proposedSlots.map((slot) => (
                       <button
                         key={slot}
                         onClick={() => confirmAppointment(appt.id, slot)}
@@ -221,8 +235,9 @@ export default function NurseQueuePage() {
                       >
                         Simulate patient confirms {slot}
                       </button>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </li>
               );
             })}

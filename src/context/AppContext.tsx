@@ -43,7 +43,8 @@ interface AppContextValue {
   resolveAlert: (alertId: string) => void;
   escalateToDoctor: (alertId: string) => void;
   reviewAlert: (alertId: string) => void;
-  contactPatient: (alertId: string) => void;
+  setDoctorAttention: (alertId: string, needsAttention: boolean) => void;
+  recommendAppointment: (alertId: string, reason: string) => void;
   sendNurseMessage: (alertId: string, content: string) => void;
   approveAndCloseAlert: (alertId: string, finalMessage: string) => void;
   suggestAppointment: (alertId: string, input: {
@@ -233,7 +234,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resolveAlert = useCallback((alertId: string) => updateAlert(alertId, { status: "resolved" }), [updateAlert]);
-  const reviewAlert = useCallback((alertId: string) => updateAlert(alertId, { status: "reviewed" }), [updateAlert]);
+  const reviewAlert = useCallback((alertId: string) => {
+    setState((s) => {
+      const alert = s.alerts.find((a) => a.id === alertId);
+      const reviewer = s.patients.find((p) => p.id === alert?.patientId)?.assignedDoctor ?? "Doctor";
+      return refreshPatientStatuses({
+        ...s,
+        alerts: s.alerts.map((a) =>
+          a.id === alertId
+            ? { ...a, status: "reviewed", reviewedBy: reviewer, reviewedAt: "12 Jun 2025 · 10:05 GST" }
+            : a
+        ),
+      });
+    });
+  }, []);
 
   const appendToCheckin = useCallback((s: AppState, alertId: string, newMessages: ConversationMessage[]): { state: AppState; checkinId?: string } => {
     const alert = s.alerts.find((a) => a.id === alertId);
@@ -315,6 +329,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((s) => {
       const alert = s.alerts.find((a) => a.id === alertId);
       if (!alert) return s;
+      const suggested = s.appointments.find((a) => a.alertId === alertId && a.status === "SUGGESTED");
       const appointment: Appointment = {
         id: nextId("appt"),
         patientId: alert.patientId,
@@ -334,7 +349,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         content: `We’d like to offer you a ${input.type.toLowerCase()} with ${input.clinician}. Proposed times: ${input.proposedSlots.join(" · ")}. Please let us know which suits you.`,
         createdAt: "12 Jun 2025 · 10:10 GST",
       };
-      const { state: withMsg, checkinId } = appendToCheckin({ ...s, appointments: [...s.appointments, appointment] }, alertId, [msg]);
+      const appointments = suggested
+        ? s.appointments.map((a) =>
+            a.id === suggested.id
+              ? { ...a, type: input.type, clinician: input.clinician, proposedSlots: input.proposedSlots, reason: input.reason, status: "OPTIONS_SENT" as const }
+              : a
+          )
+        : [...s.appointments, appointment];
+      const { state: withMsg, checkinId } = appendToCheckin({ ...s, appointments }, alertId, [msg]);
       if (!checkinId) return s;
       return refreshPatientStatuses({
         ...withMsg,
@@ -387,7 +409,91 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [appendToCheckin]);
 
-  const contactPatient = useCallback((alertId: string) => updateAlert(alertId, { status: "contacted" }), [updateAlert]);
+  const setDoctorAttention = useCallback((alertId: string, needsAttention: boolean) => {
+    setState((s) => {
+      const alert = s.alerts.find((a) => a.id === alertId);
+      if (!alert) return s;
+      const doctor = s.patients.find((p) => p.id === alert.patientId)?.assignedDoctor ?? "Doctor";
+      return refreshPatientStatuses({
+        ...s,
+        alerts: s.alerts.map((a) =>
+          a.id === alertId
+            ? needsAttention
+              ? {
+                  ...a,
+                  status: "reviewed",
+                  doctorAttention: "NEEDS_ATTENTION",
+                  reviewedBy: doctor,
+                  reviewedAt: "12 Jun 2025 · 10:05 GST",
+                }
+              : {
+                  ...a,
+                  status: "resolved",
+                  doctorAttention: "NO_ATTENTION_NEEDED",
+                  reviewedBy: doctor,
+                  reviewedAt: "12 Jun 2025 · 10:05 GST",
+                  closedBy: doctor,
+                  closedAt: "12 Jun 2025 · 10:05 GST",
+                }
+            : a
+        ),
+      });
+    });
+  }, []);
+
+  const recommendAppointment = useCallback((alertId: string, reason: string) => {
+    const text = reason.trim();
+    if (!text) return;
+    setState((s) => {
+      const alert = s.alerts.find((a) => a.id === alertId);
+      if (!alert) return s;
+      const patient = s.patients.find((p) => p.id === alert.patientId);
+      const doctor = patient?.assignedDoctor ?? "Doctor";
+      const existing = s.appointments.find(
+        (a) => a.alertId === alertId && ["SUGGESTED", "OPTIONS_SENT", "BOOKED"].includes(a.status)
+      );
+      const appointments = existing
+        ? s.appointments
+        : [
+            ...s.appointments,
+            {
+              id: nextId("appt"),
+              patientId: alert.patientId,
+              alertId,
+              type: "Clinical review",
+              clinician: doctor,
+              proposedSlots: [],
+              status: "SUGGESTED",
+              reason: text,
+              createdAt: "12 Jun 2025 · 10:08 GST",
+            } satisfies Appointment,
+          ];
+      const msg: ConversationMessage = {
+        id: nextId("m"),
+        role: "CLINIC",
+        sender: "SYSTEM",
+        content: `Internal doctor recommendation: schedule a clinical review. Reason: ${text}`,
+        createdAt: "12 Jun 2025 · 10:08 GST",
+      };
+      const { state: withMsg, checkinId } = appendToCheckin({ ...s, appointments }, alertId, [msg]);
+      if (!checkinId) return s;
+      return refreshPatientStatuses({
+        ...withMsg,
+        alerts: withMsg.alerts.map((a) =>
+          a.id === alertId
+            ? {
+                ...a,
+                doctorAttention: "NEEDS_ATTENTION",
+                doctorRecommendation: text,
+                status: "reviewed",
+                reviewedBy: doctor,
+                reviewedAt: "12 Jun 2025 · 10:08 GST",
+              }
+            : a
+        ),
+      });
+    });
+  }, [appendToCheckin]);
   const escalateToDoctor = useCallback(
     (alertId: string) =>
       setState((s) =>
@@ -427,14 +533,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resolveAlert,
       escalateToDoctor,
       reviewAlert,
-      contactPatient,
+      setDoctorAttention,
+      recommendAppointment,
       sendNurseMessage,
       approveAndCloseAlert,
       suggestAppointment,
       confirmAppointment,
       resetDemo,
     }),
-    [state, hydrated, setRole, simulateReply, resolveAlert, escalateToDoctor, reviewAlert, contactPatient, sendNurseMessage, approveAndCloseAlert, suggestAppointment, confirmAppointment, resetDemo]
+    [state, hydrated, setRole, simulateReply, resolveAlert, escalateToDoctor, reviewAlert, setDoctorAttention, recommendAppointment, sendNurseMessage, approveAndCloseAlert, suggestAppointment, confirmAppointment, resetDemo]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
